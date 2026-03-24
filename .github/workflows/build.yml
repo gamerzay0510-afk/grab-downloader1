@@ -17,34 +17,26 @@ jobs:
       with:
         python-version: '3.11'
     
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install cython==0.29.37
-        pip install kivy==2.3.0
-        pip install python-for-android
-    
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool pkg-config
+        sudo apt-get install -y autoconf automake libtool pkg-config libffi-dev
+        pip install --upgrade pip
+        pip install cython==0.29.37
+        pip install kivy==2.3.0
+        pip install buildozer==1.5.0
         
     - name: Build APK
       run: |
+        export ANDROID_HOME=/usr/local/lib/android/sdk
         export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
-        p4a apk --debug --private /home/runner/work/grab-downloader1 \
-          --name grabdownloader \
-          --package org.grab.grabdownloader \
-          --version 4.0 \
-          --requirements python3,kivy \
-          --android-api 34 \
-          --android-min-api 21 \
-          --arch arm64-v8a
-        find /home/runner/.local/share/python-for-android -name "*.apk" 2>/dev/null
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_NDK_HOME
+        buildozer android debug
+        ls -la bin/
       shell: bash
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: grabdownloader-apk
-        path: /home/runner/.local/share/python-for-android/*.apk
+        path: bin/*.apk
