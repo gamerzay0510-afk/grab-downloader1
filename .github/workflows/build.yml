@@ -1,1 +1,41 @@
 
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install cython==0.29.37
+        pip install kivy==2.3.0
+        pip install buildozer
+        pip install python-for-android
+      shell: bash
+    
+    - name: Build debug APK
+      run: |
+        buildozer android debug
+        ls -la bin/
+      shell: bash
+    
+    - name: Upload APK
+      if: success()
+      uses: actions/upload-artifact@v4
+      with:
+        name: grabdownloader-apk
+        path: bin/*.apk
