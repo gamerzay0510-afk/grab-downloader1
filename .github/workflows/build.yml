@@ -24,8 +24,14 @@ jobs:
         pip install kivy==2.3.0
         pip install python-for-android
     
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y autoconf automake libtool pkg-config
+        
     - name: Build APK
       run: |
+        export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
         p4a apk --debug --private /home/runner/work/grab-downloader1 \
           --name grabdownloader \
           --package org.grab.grabdownloader \
