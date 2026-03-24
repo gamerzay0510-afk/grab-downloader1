@@ -26,6 +26,11 @@ jobs:
     - name: Install Android SDK
       uses: android-actions/setup-android@v2
     
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libltdl-dev autoconf automake libtool
+
     - name: Install dependencies
       run: |
         pip install --upgrade pip
