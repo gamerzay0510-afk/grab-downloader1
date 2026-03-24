@@ -1,4 +1,3 @@
-
 name: Build Android APK
 
 on:
@@ -29,13 +28,16 @@ jobs:
     
     - name: Build debug APK
       run: |
-        buildozer android debug
+        buildozer android debug 2>&1 | tee buildozer.log
         ls -la bin/
+        cat buildozer.log | tail -100
       shell: bash
     
-    - name: Upload APK
-      if: success()
+    - name: Upload artifacts
+      if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: grabdownloader-apk
-        path: bin/*.apk
+        name: build-artifacts
+        path: |
+          bin/*.apk
+          buildozer.log
