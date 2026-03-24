@@ -6,34 +6,26 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    container: kivyteam/kivy:python3.11
+    timeout-minutes: 60
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Install system dependencies
+    - name: Set up environment
       run: |
-        sudo apt-get update
-        sudo apt-get install -y autoconf automake libtool pkg-config libffi-dev
-        pip install --upgrade pip
-        pip install cython==0.29.37
-        pip install kivy==2.3.0
-        pip install buildozer==1.5.0
-        
+        export ANDROID_HOME=/opt/android-sdk
+        export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/25b
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_NDK_HOME
+        pip install --upgrade pip buildozer
+        echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
+        echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+    
     - name: Build APK
       run: |
-        export ANDROID_HOME=/usr/local/lib/android/sdk
-        export ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_NDK_HOME
         buildozer android debug
         ls -la bin/
-      shell: bash
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
