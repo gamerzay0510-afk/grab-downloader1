@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     
     steps:
     - name: Checkout code
@@ -22,22 +22,22 @@ jobs:
         pip install --upgrade pip
         pip install cython==0.29.37
         pip install kivy==2.3.0
-        pip install buildozer
         pip install python-for-android
-      shell: bash
     
-    - name: Build debug APK
+    - name: Build APK
       run: |
-        buildozer android debug 2>&1 | tee buildozer.log
-        ls -la bin/
-        cat buildozer.log | tail -100
+        p4a apk --debug --private /home/runner/work/grab-downloader1 \
+          --name grabdownloader \
+          --package org.grab.grabdownloader \
+          --version 4.0 \
+          --requirements python3,kivy \
+          --android-api 31 \
+          --android-min-api 21
+        find /home/runner/.local/share/python-for-android -name "*.apk" 2>/dev/null
       shell: bash
     
-    - name: Upload artifacts
-      if: always()
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: build-artifacts
-        path: |
-          bin/*.apk
-          buildozer.log
+        name: grabdownloader-apk
+        path: /home/runner/.local/share/python-for-android/*.apk
