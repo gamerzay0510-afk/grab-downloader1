@@ -32,7 +32,8 @@ jobs:
           --version 4.0 \
           --requirements python3,kivy \
           --android-api 31 \
-          --android-min-api 21
+          --android-min-api 21 \
+          --arch arm64-v8a
         find /home/runner/.local/share/python-for-android -name "*.apk" 2>/dev/null
       shell: bash
     
