@@ -5,30 +5,46 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    container: kivyteam/kivy:python3.11
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Set up environment
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '17'
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install Android SDK
+      uses: android-actions/setup-android@v2
+    
+    - name: Install dependencies
       run: |
-        export ANDROID_HOME=/opt/android-sdk
-        export ANDROID_NDK_HOME=$ANDROID_HOME/ndk/25b
-        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_NDK_HOME
-        pip install --upgrade pip buildozer
-        echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-        echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME" >> $GITHUB_ENV
+        pip install --upgrade pip
+        pip install cython==0.29.37
+        pip install kivy==2.3.0
+        pip install buildozer==1.4.0
     
     - name: Build APK
       run: |
-        buildozer android debug
-        ls -la bin/
+        export ANDROID_HOME=$ANDROID_SDK_ROOT
+        export ANDROID_NDK_HOME=$ANDROID_NDK_ROOT
+        buildozer android debug 2>&1 | tee buildozer.log
+        ls -la bin/ || true
+        find . -name "*.apk" -type f 2>/dev/null
     
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: grabdownloader-apk
-        path: bin/*.apk
+        path: |
+          bin/*.apk
+          buildozer.log
